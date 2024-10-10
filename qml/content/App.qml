@@ -3,7 +3,7 @@ import QtQuick.Window 2.12
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.12
 import QtQuick.VirtualKeyboard 2.15
-import QtGraphicalEffects 1.12
+import Qt5Compat.GraphicalEffects
 import STLauncherV2 1.0
 
 Window {

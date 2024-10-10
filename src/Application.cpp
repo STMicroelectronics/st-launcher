@@ -10,16 +10,20 @@ Application::Application(QString fileName, QObject *parent)
     : QObject(parent), m_fileName(fileName) {}
 
 bool Application::parse() {
-  // Supporting only .destop files (Linux OS)
+  // Supporting only .desktop files (Linux OS)
   static const QSettings::Format DesktopFileFormat = QSettings::registerFormat(
       "desktopfile", desktopFileRead, desktopFileWrite);
-  QString locale = QLocale::system().name().split(QRegExp("_")).at(0);
+  static QRegularExpression re_desktopfile = QRegularExpression("_");
+  QString locale = QLocale::system().name().split(re_desktopfile).at(0);
+
 
   DEBUG_MSG("Parsing " << fileName() << " file...");
 
   QSettings settings(fileName(), DesktopFileFormat);
-  QRegExp ignoredApps = QRegExp(IGNORED_APPS_REGEXP);
+  static QRegularExpression ignoredApps = QRegularExpression(IGNORED_APPS_REGEXP);
+#if QT_VERSION < 0x060000
   settings.setIniCodec("UTF-8");
+#endif
 
   // Check if the Application exist if TryExec is set.
   // If the application doesnt exists also mark as invalid
@@ -53,8 +57,9 @@ bool Application::parse() {
   setCategories(getLocalizedValue(settings, locale, DESKTOP_KEY_CATEGORIES)
                     .toStringList());
   // Force set Ignored if its in our ignore list
-  setIsIgnored((ignoredApps.indexIn(fileName()) != -1) ||
-               (ignoredApps.indexIn(exec()) != -1));
+  QRegularExpressionMatch match_fileName = ignoredApps.match(fileName(), 0, QRegularExpression::PartialPreferFirstMatch);
+  QRegularExpressionMatch match_exec = ignoredApps.match(exec(), 0, QRegularExpression::PartialPreferFirstMatch);
+  setIsIgnored(match_fileName.hasMatch() || match_exec.hasMatch());
 
   // Precalculate search string for filtering
   m_searchTerms.clear();
@@ -92,7 +97,8 @@ bool Application::build() {
 
 void Application::startApplication(void) {
   // Strip field codes from Exec= line
-  QString stripped = this->exec().remove(QRegExp("%[a-zA-Z]")).trimmed();
+  static QRegularExpression re_aphaonly = QRegularExpression("%[a-zA-Z]");
+  QString stripped = this->exec().remove(re_aphaonly).trimmed();
   QStringList args = QProcess::splitCommand(stripped);
   QString command = args.takeFirst();
   DEBUG_MSG("Starting process: " << command << " args: " << args.join(','));

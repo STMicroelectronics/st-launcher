@@ -50,7 +50,7 @@ DEFINES += QT_VIRTUALKEYBOARD_DESKTOP_DISABLE=1
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /usr/share/qt/$${TARGET}-1.0
+else: unix:!android: target.path = /usr/share/qt/$${TARGET}-2.0
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \

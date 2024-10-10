@@ -5,6 +5,7 @@
 #include <QFileInfo>
 #include <QIcon>
 #include <QStandardPaths>
+#include <QRegularExpression>
 
 #define DEBUG 1
 
@@ -62,7 +63,7 @@ QPixmap IconProvider::requestPixmap(const QString &id, QSize *size,
     return defaultIcon();
 
   // If it is a full path ( begins with / )
-  if (id.contains(QRegExp("^/"))) {
+  if (id.contains(QRegularExpression("^/"))) {
     // if it exist then load it from the path and return it
     QString iconPath = lookupIconExtension(id);
     if (!iconPath.isEmpty())

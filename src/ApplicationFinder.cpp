@@ -39,7 +39,11 @@ ApplicationFinder::~ApplicationFinder() {
 }
 
 void ApplicationFinder::run() {
+#if QT_VERSION >= 0x060000
+  m_thread = QtConcurrent::run(&ApplicationFinder::work, this);
+#else
   m_thread = QtConcurrent::run(this, &ApplicationFinder::work);
+#endif
   m_thread_watcher.setFuture(m_thread);
   connect(&m_thread_watcher, SIGNAL(finished()), this, SLOT(workFinished()));
 }
